@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply bg-canvas font-sans text-ink antialiased;
+    background-image:
+      radial-gradient(900px 500px at 50% -10%, rgba(110, 123, 255, 0.1), transparent 60%),
+      radial-gradient(700px 400px at 85% 0%, rgba(124, 77, 255, 0.06), transparent 55%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: rgba(110, 123, 255, 0.22);
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-brand bg-clip-text text-transparent;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #313654 transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #313654;
+    border-radius: 9999px;
+  }
+}

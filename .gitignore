@@ -1,0 +1,23 @@
+# Root-level safety net. Subfolders (be_disco/, fe_disco/) have their own
+# .gitignore too — git applies all of them hierarchically.
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Node / frontend
+node_modules/
+dist/
+
+# OS / editor
+.DS_Store
+*.log

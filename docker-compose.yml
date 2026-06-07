@@ -1,0 +1,55 @@
+# Full Disco stack — for running on a server.
+#   docker compose up -d --build      → postgres + api + web
+#   docker compose up -d postgres     → just the database (for local fe/be dev)
+#
+# Then open http://<host>:4001 (the web container proxies /api → api:4002).
+services:
+  postgres:
+    image: postgres:16
+    container_name: disco_postgres
+    environment:
+      POSTGRES_USER: disco
+      POSTGRES_PASSWORD: disco
+      POSTGRES_DB: disco
+    ports:
+      - "4003:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U disco -d disco"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build: ./be_disco
+    container_name: disco_api
+    # Migrate then serve (no --reload, no bind mount — production-style).
+    command: sh -c "uv run alembic upgrade head && uv run uvicorn app.main:app --host 0.0.0.0 --port 4002"
+    env_file: ./be_disco/.env
+    environment:
+      # Override the host defaults from .env with in-network values.
+      DATABASE_URL: postgresql+asyncpg://disco:disco@postgres:5432/disco
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:4001}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "4002:4002"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./fe_disco
+      args:
+        VITE_API_BASE_URL: /api
+    container_name: disco_web
+    depends_on:
+      - api
+    ports:
+      - "4001:4001"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
