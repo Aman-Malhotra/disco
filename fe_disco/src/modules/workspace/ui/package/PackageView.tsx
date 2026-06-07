@@ -65,7 +65,7 @@ function ProfileCard({ p }: { p: NonNullable<CampaignPackage["advertiser_profile
         {p.subcategory ? ` · ${p.subcategory}` : ""}
         {p.positioning ? ` · ${p.positioning}` : ""}
       </p>
-      {p.summary && <p className="mt-1.5 text-sm leading-relaxed text-ink-dim">{p.summary}</p>}
+      {p.summary && <p className="mt-1.5 text-xs leading-relaxed text-ink-dim">{p.summary}</p>}
       {p.benefits.length > 0 && (
         <div className="mt-3">
           <p className="mb-1.5 text-xs text-ink-mute">Benefits</p>
@@ -122,7 +122,7 @@ function CampaignCard({ c }: { c: NonNullable<CampaignPackage["campaign"]> }) {
         ))}
       </div>
 
-      {c.rationale && <p className="mt-3 text-sm leading-relaxed text-ink-mute">{c.rationale}</p>}
+      {c.rationale && <p className="mt-3 text-xs leading-relaxed text-ink-mute">{c.rationale}</p>}
     </Section>
   );
 }
@@ -138,7 +138,7 @@ function CreativesCard({ creatives }: { creatives: CampaignPackage["creatives"] 
               <span className="text-xs text-ink-mute">{cr.persona_name}</span>
             </div>
             <p className="font-display text-sm font-semibold leading-snug text-ink">{cr.headline}</p>
-            <p className="mt-1 text-sm leading-relaxed text-ink-dim">{cr.body}</p>
+            <p className="mt-1 text-xs leading-relaxed text-ink-dim">{cr.body}</p>
           </div>
         ))}
       </div>

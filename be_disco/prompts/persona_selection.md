@@ -18,3 +18,8 @@ For each persona you return, give clear pointers:
 - `risks`: concrete points on **what does not match** — the gaps or mismatches (empty list only if there is genuinely no caveat)
 
 Return only personas with **score ≥ 40**, ordered by score descending. **Do NOT pad to a fixed number** — return as few or as many as truly clear that bar.
+
+
+## Additional user guidance for this run
+If non-empty, prioritise it. If empty, ignore.
+{guidance}

@@ -18,3 +18,8 @@ Produce a `CampaignConfig`:
 - `rationale`: a short explanation of the budget + targeting + bidding choices
 
 Only allocate to publishers present in the ranked list.
+
+
+## Additional user guidance for this run
+If non-empty, prioritise it. If empty, ignore.
+{guidance}

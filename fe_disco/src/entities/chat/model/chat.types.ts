@@ -11,6 +11,9 @@ export type ChatMessage = z.infer<typeof messageSchema>;
 export type StepKey = "advertiser" | "publishers" | "personas" | "campaign" | "creatives";
 export type StepStatus = "pending" | "progress" | "completed";
 
+// A step the backend says it will run (from the `plan` event).
+export type PlanStep = { key: StepKey; label: string };
+
 export type StepEvent = {
   type: "step";
   step: StepKey;

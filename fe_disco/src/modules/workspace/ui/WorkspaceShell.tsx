@@ -15,6 +15,7 @@ export function WorkspaceShell() {
 
   const [activeId, setActiveId] = useState<string | null>(() => lastOpen.get());
   const [inflight, setInflight] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Clear optimistic state shortly after a turn ends (persisted refetch lands).
   useEffect(() => {
@@ -44,6 +45,7 @@ export function WorkspaceShell() {
   const openConversation = (id: string) => {
     setActiveId(id);
     lastOpen.set(id);
+    setMenuOpen(false);
   };
 
   const newConversation = () => {
@@ -51,6 +53,7 @@ export function WorkspaceShell() {
     lastOpen.clear();
     stream.reset();
     setInflight(null);
+    setMenuOpen(false);
   };
 
   const handleSend = async (message: string) => {
@@ -68,9 +71,21 @@ export function WorkspaceShell() {
 
   return (
     <div className="flex h-dvh overflow-hidden">
-      <SidePanel activeId={activeId} onSelect={openConversation} onNew={newConversation} />
+      <SidePanel
+        activeId={activeId}
+        onSelect={openConversation}
+        onNew={newConversation}
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+      />
       <main className="relative flex-1 overflow-hidden">
-        <MainArea activeId={activeId} inflight={inflight} stream={stream} onSend={handleSend} />
+        <MainArea
+          activeId={activeId}
+          inflight={inflight}
+          stream={stream}
+          onSend={handleSend}
+          onOpenMenu={() => setMenuOpen(true)}
+        />
       </main>
     </div>
   );

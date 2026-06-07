@@ -71,8 +71,8 @@ function Row({ item, muted }: { item: ScoredItem; muted?: boolean }) {
 
       {item.matches.length > 0 && (
         <div className="mt-2">
-          <p className="mb-1 text-xs font-medium text-signal-ok">Matches</p>
-          <ul className="space-y-1 text-sm leading-relaxed text-ink-dim">
+          <p className="mb-1 text-[11px] font-medium text-signal-ok">Matches</p>
+          <ul className="space-y-1 text-xs leading-relaxed text-ink-dim">
             {item.matches.map((r, i) => (
               <li key={i} className="flex gap-1.5">
                 <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-signal-ok" />
@@ -85,8 +85,8 @@ function Row({ item, muted }: { item: ScoredItem; muted?: boolean }) {
 
       {item.mismatches.length > 0 && (
         <div className="mt-2">
-          <p className="mb-1 text-xs font-medium text-ink-mute">Doesn&apos;t match</p>
-          <ul className="space-y-1 text-sm leading-relaxed text-ink-mute">
+          <p className="mb-1 text-[11px] font-medium text-ink-mute">Doesn&apos;t match</p>
+          <ul className="space-y-1 text-xs leading-relaxed text-ink-mute">
             {item.mismatches.map((r, i) => (
               <li key={i} className="flex gap-1.5">
                 <Ban className="mt-0.5 h-3.5 w-3.5 shrink-0 text-signal-idle" />

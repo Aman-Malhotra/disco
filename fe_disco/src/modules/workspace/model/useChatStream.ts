@@ -2,32 +2,30 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 
 import { campaignPackageSchema, type CampaignPackage } from "@/entities/campaign";
-import { chatApi, chatKeys, type StepKey, type StepStatus } from "@/entities/chat";
-
-import { STEPS } from "../config/steps";
-
-type StepState = Record<StepKey, StepStatus>;
+import { chatApi, chatKeys, type PlanStep, type StepKey, type StepStatus } from "@/entities/chat";
 
 type StreamState = {
-  steps: StepState;
+  plan: PlanStep[] | null; // null until the backend says agents are starting
+  steps: Record<string, StepStatus>;
   pkg: CampaignPackage | null;
+  answer: string | null; // a direct reply (router "answer" / run note)
   title: string | null;
   streaming: boolean;
   error: string | null;
 };
 
-const pendingSteps = (): StepState =>
-  Object.fromEntries(STEPS.map((s) => [s.key, "pending"])) as StepState;
-
 const initial = (): StreamState => ({
-  steps: pendingSteps(),
+  plan: null,
+  steps: {},
   pkg: null,
+  answer: null,
   title: null,
   streaming: false,
   error: null,
 });
 
-/** Drives one /chat turn over SSE: updates the stepper and captures the package. */
+/** Drives one /chat turn over SSE. Until a `plan` arrives, the UI shows a
+ *  plain loader; `plan` reveals the stepper, `message` shows a direct reply. */
 export function useChatStream() {
   const qc = useQueryClient();
   const [state, setState] = useState<StreamState>(initial);
@@ -51,6 +49,15 @@ export function useChatStream() {
 
           if (frame.event === "session") {
             setState((s) => ({ ...s, title: (obj.title as string) ?? null }));
+          } else if (frame.event === "message") {
+            setState((s) => ({ ...s, answer: (obj.text as string) ?? null }));
+          } else if (frame.event === "plan") {
+            const plan = (obj.steps as PlanStep[]) ?? [];
+            const steps = Object.fromEntries(plan.map((p) => [p.key, "pending"])) as Record<
+              string,
+              StepStatus
+            >;
+            setState((s) => ({ ...s, plan, steps }));
           } else if (frame.event === "step") {
             const step = obj.step as StepKey;
             const status = obj.status as StepStatus;

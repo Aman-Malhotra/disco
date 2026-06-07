@@ -13,3 +13,8 @@ Return a `Creative`:
 - `reasoning`: one line on why this copy lands for this persona
 
 Make it feel written for this person, not a template.
+
+
+## Additional user guidance for this run
+If non-empty, prioritise it. If empty, ignore.
+{guidance}

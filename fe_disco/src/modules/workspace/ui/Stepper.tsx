@@ -1,20 +1,23 @@
 import { Check, Loader2 } from "lucide-react";
 
-import type { StepKey, StepStatus } from "@/entities/chat";
+import type { PlanStep, StepStatus } from "@/entities/chat";
 import { cn } from "@/shared/lib/cn";
 
-import { STEPS } from "../config/steps";
-
-export function Stepper({ statuses }: { statuses: Record<StepKey, StepStatus> }) {
+export function Stepper({
+  plan,
+  statuses,
+}: {
+  plan: PlanStep[];
+  statuses: Record<string, StepStatus>;
+}) {
   return (
     <div className="rounded-2xl border border-canvas-rule bg-canvas-panel p-5 shadow-panel">
       <ol className="space-y-0">
-        {STEPS.map((step, i) => {
-          const status = statuses[step.key];
-          const isLast = i === STEPS.length - 1;
+        {plan.map((step, i) => {
+          const status = statuses[step.key] ?? "pending";
+          const isLast = i === plan.length - 1;
           return (
             <li key={step.key} className="flex gap-3">
-              {/* icon rail */}
               <div className="flex flex-col items-center">
                 <StepIcon status={status} index={i} />
                 {!isLast && (
@@ -27,7 +30,6 @@ export function Stepper({ statuses }: { statuses: Record<StepKey, StepStatus> })
                   />
                 )}
               </div>
-              {/* label */}
               <div className={cn("pb-5", isLast && "pb-0")}>
                 <p
                   className={cn(

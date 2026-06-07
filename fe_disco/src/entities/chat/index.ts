@@ -6,6 +6,7 @@ export type {
   ChatMessage,
   StepKey,
   StepStatus,
+  PlanStep,
   StepEvent,
   SessionEvent,
   FinalEvent,
