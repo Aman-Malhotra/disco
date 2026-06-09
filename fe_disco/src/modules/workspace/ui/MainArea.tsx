@@ -53,6 +53,12 @@ export function MainArea({ activeId, inflight, stream, onSend, onOpenMenu }: Mai
   // Plain loader until the backend commits: a `plan` (agents starting) or an answer.
   const showProcessing = Boolean(inflight) && stream.streaming && !stream.plan && !stream.answer;
 
+  // After a refresh, a turn may still be running detached on the server — the
+  // signal is an unanswered last user message. Show a loader (the poll in
+  // useSession will swap in the result once it lands).
+  const lastMessage = messages[messages.length - 1];
+  const awaitingReply = !inflight && lastMessage?.role === "user";
+
   return (
     <div className="relative flex h-dvh flex-col">
       <header className="flex items-center gap-3 border-b border-canvas-rule px-4 py-4 md:px-6">
@@ -87,6 +93,12 @@ export function MainArea({ activeId, inflight, stream, onSend, onOpenMenu }: Mai
               {stream.answer && <Markdown>{stream.answer}</Markdown>}
               {stream.plan && <Stepper plan={stream.plan} statuses={stream.steps} />}
               {stream.pkg && <PackageView pkg={stream.pkg} />}
+            </AssistantBubble>
+          )}
+
+          {awaitingReply && (
+            <AssistantBubble>
+              <Processing />
             </AssistantBubble>
           )}
 

@@ -17,7 +17,7 @@ from app.modules.chat.schemas import (
     SessionDetail,
     SessionSummary,
 )
-from app.modules.chat.service import ChatService
+from app.modules.chat.service import ChatService, start_turn
 
 router = APIRouter(tags=["chat"])
 
@@ -63,15 +63,20 @@ async def get_session(
 
 
 @router.post("/chat/{session_id}")
-async def chat(
-    session_id: uuid.UUID,
-    body: ChatMessageRequest,
-    service: ChatService = Depends(get_chat_service),
-) -> StreamingResponse:
-    """Send a message → stream every workflow state back as SSE."""
+async def chat(session_id: uuid.UUID, body: ChatMessageRequest) -> StreamingResponse:
+    """Send a message → stream every workflow state back as SSE.
+
+    The turn runs as a detached task, so refreshing the page stops the stream
+    but the turn still completes and persists.
+    """
+    queue = start_turn(session_id, body.message)
 
     async def event_stream() -> AsyncIterator[str]:
-        async for event, data in service.stream_chat(session_id, body.message):
+        while True:
+            frame = await queue.get()
+            if frame is None:
+                break
+            event, data = frame
             yield f"event: {event}\ndata: {data}\n\n"
 
     return StreamingResponse(

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import uuid
 from collections.abc import AsyncIterator
@@ -9,6 +10,7 @@ from app.agents.context import AgentContext
 from app.agents.router_agent import RouterAgent
 from app.core.errors import NotFoundError
 from app.core.logging import get_logger
+from app.db.session import AsyncSessionLocal
 from app.llm.factory import build_provider
 from app.llm.prompts import render
 from app.llm.schemas import LLMRequest, Message
@@ -20,6 +22,9 @@ log = get_logger("chat.service")
 
 # One SSE frame: (event name, JSON payload string).
 SseFrame = tuple[str, str]
+
+# Keep references to detached turn tasks so they aren't garbage-collected.
+_background_turns: set[asyncio.Task[None]] = set()
 
 
 class ChatService:
@@ -119,6 +124,36 @@ class ChatService:
         )
         await self.repository.db.commit()
         yield ("done", "{}")
+
+
+async def _run_turn_detached(
+    session_id: uuid.UUID, message: str, queue: asyncio.Queue[SseFrame | None]
+) -> None:
+    """Run a chat turn on its OWN db session, detached from the request.
+
+    A client refresh cancels the SSE stream but NOT this task, so the turn runs
+    to completion and the assistant result is persisted regardless of whether
+    anyone is still listening. Frames are pushed to the queue for the stream.
+    """
+    try:
+        async with AsyncSessionLocal() as db:
+            service = ChatService(ChatRepository(db))
+            async for frame in service.stream_chat(session_id, message):
+                await queue.put(frame)
+    except Exception as exc:
+        log.error("chat.turn_crashed", error=str(exc), session_id=str(session_id))
+        await queue.put(("error", _json({"message": str(exc)})))
+    finally:
+        await queue.put(None)  # sentinel: stream complete
+
+
+def start_turn(session_id: uuid.UUID, message: str) -> asyncio.Queue[SseFrame | None]:
+    """Kick off a detached turn; returns the queue the SSE stream drains."""
+    queue: asyncio.Queue[SseFrame | None] = asyncio.Queue()
+    task = asyncio.create_task(_run_turn_detached(session_id, message, queue))
+    _background_turns.add(task)
+    task.add_done_callback(_background_turns.discard)
+    return queue
 
 
 def _latest_package(messages: list[ChatMessage]) -> dict[str, Any] | None:
